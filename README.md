@@ -5,7 +5,9 @@ Image is based on [centos:6](https://registry.hub.docker.com/_/centos/) docker i
 
 The defaults are 64MB php memory limit, opcode cache 96MB, innodb buffer pool 64MB.
 
-When built the image will expose ports 80 (WordPress) and 81 (phpMyAdmin). The virtual hosts by default use ```localhost``` as their server name.
+When built the image will expose ports 80 (WordPress) and 81 (phpMyAdmin).
+
+The virtual hosts by default use an empty server name so you can point any hostname to it, if using for local testing purposes you can just use ```http://localhost``` and ```http://localhost:81```.
 
 The virtual hosts are located under files/nginx so you can edit the server_name to match your setup.
 
@@ -34,4 +36,4 @@ TL;DR:
 # docker run -d -p 80:80 -p 81:81 goll/uwp
 ```
 
-Open your browser and go to ```http://localhost``` and ```http://localhost:81```.
+Open your browser and go to ```http://server_name``` and ```http://server_name:81```.

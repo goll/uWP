@@ -178,7 +178,8 @@ EOF
 service mysql stop
 
 # Clean up files
-rm -rf /var/www/html/phpmyadmin/setup/
+rm -rf /var/www/html/phpmyadmin/{setup,examples}/
+rm -f /var/www/html/phpmyadmin/{ChangeLog,README,RELEASE-DATE-4.4.12}
 rm -f /var/www/html/wordpress/wp-content/plugins/hello.php /var/www/html/wordpress/readme.html /tmp/*
 
 echo 'Install complete.' > /opt/installed.fin

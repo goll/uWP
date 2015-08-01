@@ -71,8 +71,8 @@ php_admin_flag[log_errors] = on
 php_admin_value[memory_limit] = ${PHP_MEM:-64M}
 
 php_value[session.save_handler] = files
-php_value[session.save_path]    = /var/lib/php-fpm/session
-php_value[soap.wsdl_cache_dir]  = /var/lib/php-fpm/wsdlcache
+php_value[session.save_path]    = /var/lib/php
+php_value[soap.wsdl_cache_dir]  = /var/lib/php
 EOF
 
 # Generate nginx config
@@ -134,7 +134,7 @@ EOF
 
 # Set permissions for nginx
 chown -R nginx. /var/www/html/{wordpress,phpmyadmin}/
-chgrp nginx /var/lib/php-fpm/*/
+chown nginx. /var/lib/php/
 
 # Delete the default nginx virtualhost
 >/etc/nginx/conf.d/default.conf
@@ -146,7 +146,7 @@ sed -i -e "s/128/${OPCACHE_MEM:-96}/" -e 's/4000/2000/' /etc/php.d/10-opcache.in
 sed -i 's/^extension/;extension/' /etc/php.d/20-{calendar,pdo,phar,sqlite3,xmlwriter,xsl}.ini /etc/php.d/30-{mysql,pdo_mysql,pdo_sqlite,wddx}.ini
 
 # Disable php expose, lower memory to 64M, increase execution time to 60s, set session path and timezone to UTC
-sed -i -e 's/^expose_php = On/expose_php = Off/' -e 's/^max_execution_time = 30/max_execution_time = 60/' -e "s/^memory_limit = 128M/memory_limit = ${PHP_MEM:-64M}/" -e 's/^;date.timezone =/date.timezone = "UTC"/' -e 's|^;session.save_path = "/tmp"|session.save_path = "/var/lib/php-fpm/session"|' /etc/php.ini
+sed -i -e 's/^expose_php = On/expose_php = Off/' -e 's/^max_execution_time = 30/max_execution_time = 60/' -e "s/^memory_limit = 128M/memory_limit = ${PHP_MEM:-64M}/" -e 's/^;date.timezone =/date.timezone = "UTC"/' -e 's|^;session.save_path = "/tmp"|session.save_path = "/var/lib/php"|' /etc/php.ini
 
 # Disable php-fpm background daemon
 sed -i 's/^daemonize = yes/daemonize = no/' /etc/php-fpm.conf
@@ -185,6 +185,12 @@ rm -f /var/www/html/wordpress/wp-content/plugins/hello.php /var/www/html/wordpre
 echo 'Install complete.' > /opt/installed.fin
 
 supervisorctl start uwp:* && exit 0
+
+else
+
+if [[ $(supervisorctl status uwp:* | grep -q -v RUNNING) -ne 1 ]]; then
+
+exit 0
 
 else
 

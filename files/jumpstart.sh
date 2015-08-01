@@ -184,18 +184,10 @@ rm -f /var/www/html/wordpress/wp-content/plugins/hello.php /var/www/html/wordpre
 
 echo 'Install complete.' > /opt/installed.fin
 
-supervisorctl start uwp:* && exit 0
+supervisorctl start uwp:*
 
 else
 
-if [[ $(supervisorctl status uwp:* | grep -q -v RUNNING) -ne 1 ]]; then
-
-exit 0
-
-else
-
-supervisorctl start uwp:* && exit 0
-
-fi
+supervisorctl start uwp:*
 
 fi

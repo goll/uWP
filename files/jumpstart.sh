@@ -197,3 +197,5 @@ else
 supervisorctl start uwp:* && exit 0
 
 fi
+
+fi

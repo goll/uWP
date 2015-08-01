@@ -17,7 +17,7 @@ Auto generated mysql passwords can be found under ```/root/mysql-root``` and ```
 
 A database called ```uwp``` will be automatically created and owned by the ```uwp_user```.
 
-On the first run, the jumpstart script will setup the system, exit, and then run the supervisor group uwp(nginx, php, mysql).
+On the first run, the jumpstart script (it's commented so I recommend you read it) will setup the system, exit, and then run the supervisor group uwp(nginx, php, mysql).
 
 Supervisord controls the services, so you can see the status of the whole group with
 

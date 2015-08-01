@@ -7,7 +7,7 @@ The defaults are 64MB php memory limit, opcode cache 96MB, innodb buffer pool 64
 
 When built the image will expose ports 80 (WordPress) and 81 (phpMyAdmin).
 
-The virtual hosts by default use an empty server name so you can point any hostname to it, if using for local testing purposes you can just use ```http://localhost``` and ```http://localhost:81```.
+The virtual hosts use an empty server name by default so you can point any hostname to it, if using locally you can just use ```http://localhost``` and ```http://localhost:81```.
 
 The virtual hosts are located under files/nginx so you can edit the server_name to match your setup.
 

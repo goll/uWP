@@ -10,6 +10,12 @@ BLOWFISH_PASS="$(pwgen -1s 32)"
 echo ${DATABASE_PASS} > /root/mysql-root
 echo ${UWP_PASS} > /root/mysql-uwp
 
+# Download the latest WordPress and phpMyAdmin
+cd /var/www/html
+curl -q -s https://wordpress.org/latest.tar.gz | tar xz
+curl -q -s "$(curl -q -s https://www.phpmyadmin.net/downloads/ | LC_ALL=C egrep -m1 -o 'https[^"]+english.tar.gz')" | tar xz
+mv {php*,phpmyadmin}
+
 # Generate phpmyadmin config
 cat << EOF > /var/www/html/phpmyadmin/config.inc.php
 <?php
@@ -23,30 +29,6 @@ cat << EOF > /var/www/html/phpmyadmin/config.inc.php
 \$cfg['PmaNoRelation_DisableWarning'] = 'true';
 \$cfg['DefaultConnectionCollation'] = 'utf8mb4_unicode_ci';
 ?>
-EOF
-
-# Generate mysql config
-cat << EOF > /etc/my.cnf
-[client]
-default-character-set = utf8mb4
-
-[mysql]
-default-character-set = utf8mb4
-
-[client-server]
-socket = /var/lib/mysql/mysql.sock
-
-[mysqld]
-skip-networking
-innodb_buffer_pool_size = ${MYSQL_MEM:-64M}
-init-connect = 'SET NAMES utf8mb4'
-collation-server = utf8mb4_unicode_ci
-character-set-server = utf8mb4
-pid-file = /var/lib/mysql/mysql.pid
-log-error = /var/lib/mysql/mysql.err
-log-warnings = 0
-
-!includedir /etc/my.cnf.d
 EOF
 
 # Generate php-fpm config
@@ -71,8 +53,7 @@ php_admin_flag[log_errors] = on
 php_admin_value[memory_limit] = ${PHP_MEM:-64M}
 
 php_value[session.save_handler] = files
-php_value[session.save_path]    = /var/lib/php
-php_value[soap.wsdl_cache_dir]  = /var/lib/php
+php_value[session.save_path]    = /var/lib/php-fpm/session
 EOF
 
 # Generate nginx config
@@ -133,8 +114,8 @@ http {
 EOF
 
 # Set permissions for nginx
-chown -R nginx. /var/www/html/{wordpress,phpmyadmin}/
-chown nginx. /var/lib/php/
+chown -R nginx. /var/www/html/*
+chown -R root:nginx /var/lib/php-fpm/*
 
 # Delete the default nginx virtualhost
 >/etc/nginx/conf.d/default.conf
@@ -146,7 +127,7 @@ sed -i -e "s/128/${OPCACHE_MEM:-96}/" -e 's/4000/2000/' /etc/php.d/10-opcache.in
 sed -i 's/^extension/;extension/' /etc/php.d/20-{calendar,pdo,phar,sqlite3,xmlwriter,xsl}.ini /etc/php.d/30-{mysql,pdo_mysql,pdo_sqlite,wddx}.ini
 
 # Disable php expose, lower memory to 64M, increase execution time to 60s, set session path and timezone to UTC
-sed -i -e 's/^expose_php = On/expose_php = Off/' -e 's/^max_execution_time = 30/max_execution_time = 60/' -e "s/^memory_limit = 128M/memory_limit = ${PHP_MEM:-64M}/" -e 's/^;date.timezone =/date.timezone = "UTC"/' -e 's|^;session.save_path = "/tmp"|session.save_path = "/var/lib/php"|' /etc/php.ini
+sed -i -e 's/^expose_php = On/expose_php = Off/' -e 's/^max_execution_time = 30/max_execution_time = 60/' -e "s/^memory_limit = 128M/memory_limit = ${PHP_MEM:-64M}/" -e 's/^;date.timezone =/date.timezone = "UTC"/' /etc/php.ini
 
 # Disable php-fpm background daemon
 sed -i 's/^daemonize = yes/daemonize = no/' /etc/php-fpm.conf
@@ -179,7 +160,7 @@ service mysql stop
 
 # Clean up files
 rm -rf /var/www/html/phpmyadmin/{setup,examples}/
-rm -f /var/www/html/phpmyadmin/{ChangeLog,README,RELEASE-DATE-4.4.12}
+rm -f /var/www/html/phpmyadmin/{ChangeLog,README,RELEASE-DATE-*}
 rm -f /var/www/html/wordpress/{readme.html,wp-content/plugins/hello.php} /tmp/*
 
 echo 'Install complete.' > /opt/installed.fin

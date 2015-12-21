@@ -9,7 +9,6 @@ COPY ./files/yum.repos.d/ /etc/yum.repos.d/
 COPY ./files/mariadb/ /etc/
 COPY ./files/supervisor/ /etc/
 COPY ./files/nginx/ /etc/nginx/conf.d/
-COPY ./files/jumpstart.sh /opt/
 
 RUN rpm --quiet --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6 https://yum.mariadb.org/RPM-GPG-KEY-MariaDB http://nginx.org/keys/nginx_signing.key && \
 yum -q -y install https://centos6.iuscommunity.org/ius-release.rpm && \
@@ -21,6 +20,8 @@ yum -q -y install MariaDB-server nginx php56u{-fpm,-gd,-mbstring,-mcrypt,-mysqln
 yum -q clean all && \
 easy_install -q supervisor && \
 mkdir /var/log/supervisor
+
+COPY ./files/jumpstart.sh /opt/
 
 CMD ["/usr/bin/supervisord", "--configuration=/etc/supervisord.conf"]
 

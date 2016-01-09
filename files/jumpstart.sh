@@ -51,6 +51,8 @@ pm.max_requests = 500
 php_admin_value[error_log] = /var/log/php-fpm/error.log
 php_admin_flag[log_errors] = on
 php_admin_value[memory_limit] = ${PHP_MEM:-64M}
+php_admin_value[post_max_size] = 64M
+php_admin_value[upload_max_filesize] = 64M
 
 php_value[session.save_handler] = files
 php_value[session.save_path]    = /var/lib/php-fpm/session
@@ -85,7 +87,7 @@ http {
     sendfile        on;
     tcp_nopush      on;
     tcp_nodelay     on;
-    client_max_body_size 8m;
+    client_max_body_size 64m;
     keepalive_timeout    30;
     client_body_timeout  30;
     reset_timedout_connection on;
